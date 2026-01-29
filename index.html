@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Communication Log</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Teacher Communication Log</h1>
+        
+        <div id="auth-section">
+    <h2>Sign In</h2>
+    <form id="auth-form">
+        <!-- First Name (only shown on sign up) -->
+        <div id="first-name-field" style="display: none;">
+            <input type="text" id="first-name" placeholder="First Name *" maxlength="50">
+        </div>
+        
+        <!-- Last Name (only shown on sign up) -->
+        <div id="last-name-field" style="display: none;">
+            <input type="text" id="last-name" placeholder="Last Name or Initial (optional)" maxlength="50">
+        </div>
+        
+        <!-- Email (always shown) -->
+        <input type="email" id="email" placeholder="Email" required>
+        
+        <!-- Password (always shown) -->
+        <input type="password" id="password" placeholder="Password (min 6 characters)" required minlength="6">
+        
+        <!-- Confirm Password (only shown on sign up) -->
+        <div id="confirm-password-field" style="display: none;">
+            <input type="password" id="confirm-password" placeholder="Confirm Password *">
+        </div>
+        
+        <button type="submit">Sign In</button>
+    </form>
+    <p>Don't have an account? <a href="#" id="toggle-signup">Sign Up</a></p>
+</div>
+
+        <div id="app-section" style="display: none;">
+    <div class="header">
+        <p>Welcome! <button id="signout-btn">Sign Out</button></p>
+    </div>
+
+    <!-- Log Entry Form -->
+    <div class="log-form-section">
+        <h2>➕ Log New Communication</h2>
+        <form id="log-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="student-name">Student Name</label>
+                    <input type="text" id="student-name" required placeholder="e.g., Johnny Smith">
+                </div>
+                
+                <div class="form-group">
+                    <label for="parent-name">Parent/Guardian Name</label>
+                    <input type="text" id="parent-name" required placeholder="e.g., Jane Smith">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="method">Communication Method</label>
+                    <select id="method" required>
+                        <option value="">Select method...</option>
+                        <option value="phone">📞 Phone Call</option>
+                        <option value="email">✉️ Email</option>
+                        <option value="in-person">👤 In-Person</option>
+                        <option value="text">💬 Text Message</option>
+                        <option value="other">📝 Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="topic">Topic</label>
+                    <select id="topic" required>
+                        <option value="">Select topic...</option>
+                        <option value="behavior">Behavior</option>
+                        <option value="academic">Academic</option>
+                        <option value="attendance">Attendance</option>
+                        <option value="iep_504">IEP/504</option>
+                        <option value="general">General</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="summary">Summary (500 characters max)</label>
+                <textarea id="summary" required maxlength="500" rows="4" placeholder="Brief summary of what was discussed..."></textarea>
+                <div class="char-count"><span id="char-counter">0</span>/500</div>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="follow-up">
+                    Follow-up needed
+                </label>
+            </div>
+
+            <button type="submit" class="submit-btn">Log Communication</button>
+        </form>
+    </div>
+
+    <!-- Communications List -->
+    <div class="communications-section">
+        <h2>📋 Your Communications</h2>
+        <div id="communications-list">
+            <p>No communications logged yet.</p>
+        </div>
+    </div>
+</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+</body>
+</html>
