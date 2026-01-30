@@ -279,10 +279,17 @@ async function loadCommunications() {
         
         console.log('Communications loaded:', data);
         
-        if (data.length === 0) {
+        // Store all communications
+        allCommunications = data || [];
+        filteredCommunications = [...allCommunications];
+        
+        // Attach search listeners (only once)
+        attachSearchListeners();
+        
+        if (allCommunications.length === 0) {
             communicationsList.innerHTML = '<p>No communications logged yet.</p>';
         } else {
-            displayCommunications(data);
+            displayCommunications(filteredCommunications);
         }
         
     } catch (error) {
@@ -290,7 +297,65 @@ async function loadCommunications() {
         communicationsList.innerHTML = '<p>Error loading communications: ' + error.message + '</p>';
     }
 }
+// Search and filter state
+let allCommunications = [];
+let filteredCommunications = [];
 
+// Get search elements
+const searchInput = document.getElementById('search-input');
+const clearSearchBtn = document.getElementById('clear-search');
+
+// Search function
+function searchCommunications(searchTerm) {
+    const term = searchTerm.toLowerCase().trim();
+    
+    if (!term) {
+        // If search is empty, show all communications
+        filteredCommunications = [...allCommunications];
+    } else {
+        // Filter communications that match search term
+        filteredCommunications = allCommunications.filter(comm => {
+            const studentName = (comm.student_name || '').toLowerCase();
+            const parentName = (comm.parent_name || '').toLowerCase();
+            const summary = (comm.summary || '').toLowerCase();
+            
+            return studentName.includes(term) || 
+                   parentName.includes(term) || 
+                   summary.includes(term);
+        });
+    }
+    
+    // Display filtered results
+    displayCommunications(filteredCommunications);
+    
+    // Show/hide clear button
+    clearSearchBtn.style.display = term ? 'block' : 'none';
+}
+
+// Add search event listener (will be attached after DOM loads)
+function attachSearchListeners() {
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            searchCommunications(e.target.value);
+        });
+    }
+    
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            searchCommunications('');
+        });
+    }
+}
+// Display communications in the list
+function displayCommunications(communications) {
+    // Show "no results" if filtered list is empty
+    if (communications.length === 0) {
+        communicationsList.innerHTML = '<p>No communications found matching your search.</p>';
+        return;
+    }
+    
+    communicationsList.innerHTML = communications.map(comm => {
 // Display communications in the list
 function displayCommunications(communications) {
     communicationsList.innerHTML = communications.map(comm => {
