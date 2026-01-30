@@ -400,4 +400,4 @@ function displayCommunications(communications) {
     });
 
     console.log('App initialization complete!');
-});
+})}});
