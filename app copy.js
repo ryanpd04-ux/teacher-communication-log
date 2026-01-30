@@ -283,80 +283,55 @@ document.addEventListener('DOMContentLoaded', function() {
     // Search and filter state
     let allCommunications = [];
     let filteredCommunications = [];
-    let currentMethodFilter = 'all';
 
     // Get search elements
     const searchInput = document.getElementById('search-input');
     const clearSearchBtn = document.getElementById('clear-search');
 
     // Search function
-function searchCommunications(searchTerm) {
-    const term = searchTerm.toLowerCase().trim();
-    
-    // Start with all communications
-    let results = [...allCommunications];
-    
-    // Apply method filter first
-    if (currentMethodFilter !== 'all') {
-        results = results.filter(comm => comm.method === currentMethodFilter);
+    function searchCommunications(searchTerm) {
+        const term = searchTerm.toLowerCase().trim();
+        
+        if (!term) {
+            // If search is empty, show all communications
+            filteredCommunications = [...allCommunications];
+        } else {
+            // Filter communications that match search term
+            filteredCommunications = allCommunications.filter(comm => {
+                const studentName = (comm.student_name || '').toLowerCase();
+                const parentName = (comm.parent_name || '').toLowerCase();
+                const summary = (comm.summary || '').toLowerCase();
+                
+                return studentName.includes(term) || 
+                       parentName.includes(term) || 
+                       summary.includes(term);
+            });
+        }
+        
+        // Display filtered results
+        displayCommunications(filteredCommunications);
+        
+        // Show/hide clear button
+        if (clearSearchBtn) {
+            clearSearchBtn.style.display = term ? 'block' : 'none';
+        }
     }
-    
-    // Then apply search term
-    if (term) {
-        results = results.filter(comm => {
-            const studentName = (comm.student_name || '').toLowerCase();
-            const parentName = (comm.parent_name || '').toLowerCase();
-            const summary = (comm.summary || '').toLowerCase();
-            
-            return studentName.includes(term) || 
-                   parentName.includes(term) || 
-                   summary.includes(term);
-        });
-    }
-    
-    filteredCommunications = results;
-    
-    // Display filtered results
-    displayCommunications(filteredCommunications);
-    
-    // Show/hide clear button
-    if (clearSearchBtn) {
-        clearSearchBtn.style.display = term ? 'block' : 'none';
-    }
-}
+
     // Add search event listeners
-function attachSearchListeners() {
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            searchCommunications(e.target.value);
-        });
+    function attachSearchListeners() {
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                searchCommunications(e.target.value);
+            });
+        }
+        
+        if (clearSearchBtn) {
+            clearSearchBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                searchCommunications('');
+            });
+        }
     }
-    
-    if (clearSearchBtn) {
-        clearSearchBtn.addEventListener('click', () => {
-            searchInput.value = '';
-            searchCommunications('');
-        });
-    }
-    
-    // Attach filter button listeners
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    filterButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Remove active class from all buttons
-            filterButtons.forEach(b => b.classList.remove('active'));
-            
-            // Add active class to clicked button
-            btn.classList.add('active');
-            
-            // Get filter value
-            currentMethodFilter = btn.getAttribute('data-filter');
-            
-            // Re-run search with current filter
-            searchCommunications(searchInput ? searchInput.value : '');
-        });
-    });
-}
 
     // Load and display communications
     async function loadCommunications() {
