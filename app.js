@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
         appSection.style.display = 'none';
         // Clear communications list when signing out
         if (communicationsList) {
-            communicationsList.innerHTML = '<p>No communications logged yet.</p>';
+            communicationsList.innerHTML = '';
         }
     }
 
@@ -203,8 +203,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        loadCommunications();
-    }
+        loadCommunications().then(() => {
+        // Display all communications on initial load
+        searchCommunications('');
+    });
+}
+    
 
     // Get form elements
     const logForm = document.getElementById('log-form');
@@ -266,12 +270,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Communication saved!', data);
                 alert('✅ Communication logged successfully!');
                 
-                // Reset form
+              // Reset form
                 logForm.reset();
                 charCounter.textContent = '0';
-                
-                // Reload communications list
-                loadCommunications();
+
+                // Reload communications list but maintain current filters
+                loadCommunications().then(() => {
+                    // Re-apply current search/filters after loading
+                    const currentSearchTerm = searchInput ? searchInput.value : '';
+                    searchCommunications(currentSearchTerm);
+            });
+                // Re-apply current search/filters after loading
+                setTimeout(() => {
+                    searchCommunications(currentSearchTerm);
+                }, 100);
                 
             } catch (error) {
                 console.error('Error saving communication:', error);
@@ -288,6 +300,7 @@ let currentTopicFilter = 'all';
 let currentDateFilter = 'all';
 let customStartDate = null;
 let customEndDate = null;
+let listenersAttached = false;
 
     // Get search elements
     const searchInput = document.getElementById('search-input');
@@ -366,6 +379,8 @@ function searchCommunications(searchTerm) {
 }
    // Add search event listeners
 function attachSearchListeners() {
+    if (listenersAttached) return;
+    listenersAttached = true;
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
             searchCommunications(e.target.value);
@@ -394,6 +409,7 @@ function attachSearchListeners() {
             
             // Re-run search with current filters
             searchCommunications(searchInput ? searchInput.value : '');
+            updateClearFiltersButton(); 
         });
     });
     
@@ -412,6 +428,7 @@ function attachSearchListeners() {
             
             // Re-run search with current filters
             searchCommunications(searchInput ? searchInput.value : '');
+            updateClearFiltersButton(); // Add this line
         });
     });
     // Attach date filter button listeners
@@ -444,6 +461,7 @@ function attachSearchListeners() {
                 currentDateFilter = days;
                 // Re-run search with current filters
                 searchCommunications(searchInput ? searchInput.value : '');
+                updateClearFiltersButton(); // Add this line
             }
         });
     });
@@ -471,44 +489,149 @@ function attachSearchListeners() {
             // Re-run search with custom date range
             currentDateFilter = 'custom';
             searchCommunications(searchInput ? searchInput.value : '');
+            updateClearFiltersButton();
+        });
+    }
+    // ==========================================
+    // COLLAPSIBLE FILTERS FUNCTIONALITY
+    // ==========================================
+    
+    // Main Filters Toggle
+    const filtersToggle = document.getElementById('filters-toggle');
+    const filtersContent = document.getElementById('filters-content');
+    
+    if (filtersToggle && filtersContent) {
+        filtersToggle.addEventListener('click', () => {
+            const isExpanded = filtersContent.style.display === 'block';
+            
+            if (isExpanded) {
+                // Collapse main filters
+                filtersContent.style.display = 'none';
+                filtersToggle.classList.remove('expanded');
+            } else {
+                // Expand main filters
+                filtersContent.style.display = 'block';
+                filtersToggle.classList.add('expanded');
+            }
+        });
+    }
+    
+    // Subsection Toggles (Method, Topic, Date)
+    const subsectionToggles = document.querySelectorAll('.filter-subsection-toggle');
+    
+    subsectionToggles.forEach(toggle => {
+        toggle.addEventListener('click', () => {
+            const targetId = toggle.getAttribute('data-target');
+            const targetContent = document.getElementById(targetId);
+            
+            if (targetContent) {
+                const isExpanded = targetContent.style.display === 'block';
+                
+                if (isExpanded) {
+                    // Collapse this subsection
+                    targetContent.style.display = 'none';
+                    toggle.classList.remove('expanded');
+                } else {
+                    // Expand this subsection
+                    targetContent.style.display = 'block';
+                    toggle.classList.add('expanded');
+                }
+            }
+        });
+    });
+    // ==========================================
+    // CLEAR ALL FILTERS FUNCTIONALITY
+    // ==========================================
+    
+    const clearAllFiltersBtn = document.getElementById('clear-all-filters');
+    
+    function updateClearFiltersButton() {
+        if (!clearAllFiltersBtn) return;
+        
+        // Show button if any filter is active (not "all")
+        const hasActiveFilters = 
+            currentMethodFilter !== 'all' || 
+            currentTopicFilter !== 'all' || 
+            currentDateFilter !== 'all';
+        
+        clearAllFiltersBtn.style.display = hasActiveFilters ? 'block' : 'none';
+    }
+    
+    if (clearAllFiltersBtn) {
+        clearAllFiltersBtn.addEventListener('click', () => {
+            // Reset all filter states
+            currentMethodFilter = 'all';
+            currentTopicFilter = 'all';
+            currentDateFilter = 'all';
+            customStartDate = null;
+            customEndDate = null;
+            
+            // Reset all filter buttons to "All"
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-filter') === 'all');
+            });
+            
+            document.querySelectorAll('.topic-filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-topic') === 'all');
+            });
+            
+            document.querySelectorAll('.date-filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-days') === 'all');
+            });
+            
+            // Hide custom date range
+            const customDateRange = document.getElementById('custom-date-range');
+            if (customDateRange) {
+                customDateRange.style.display = 'none';
+            }
+            
+            // Clear search input
+            if (searchInput) {
+                searchInput.value = '';
+            }
+            
+            // Re-run search to show all communications
+            searchCommunications('');
+            
+            // Update button visibility
+            updateClearFiltersButton();
         });
     }
 }
 
     // Load and display communications
-    async function loadCommunications() {
-        console.log('Loading communications...');
+async function loadCommunications() {
+    console.log('Loading communications...');
+    
+    try {
+        const { data, error } = await supabase
+            .from('communications')
+            .select('*')
+            .order('communication_date', { ascending: false });
         
-        try {
-            const { data, error } = await supabase
-                .from('communications')
-                .select('*')
-                .order('communication_date', { ascending: false });
-            
-            if (error) throw error;
-            
-            console.log('Communications loaded:', data);
-            
-            // Store all communications
-            allCommunications = data || [];
-            filteredCommunications = [...allCommunications];
-            
-            // Attach search listeners (only once)
-            attachSearchListeners();
-            
-            if (allCommunications.length === 0) {
-                communicationsList.innerHTML = '<p>No communications logged yet.</p>';
-            } else {
-                displayCommunications(filteredCommunications);
-            }
-            
-        } catch (error) {
-            console.error('Error loading communications:', error);
-            if (communicationsList) {
-                communicationsList.innerHTML = '<p>Error loading communications: ' + error.message + '</p>';
-            }
+        if (error) throw error;
+        
+        console.log('Communications loaded:', data);
+        
+        // Store all communications
+        allCommunications = data || [];
+        
+        // DON'T automatically set filteredCommunications here
+        // Let searchCommunications handle it
+        
+        // Attach search listeners (only once)
+        attachSearchListeners();
+        
+        return allCommunications; // Add this return statement
+        
+    } catch (error) {
+        console.error('Error loading communications:', error);
+        if (communicationsList) {
+            communicationsList.innerHTML = '<p>Error loading communications: ' + error.message + '</p>';
         }
+        return []; // Return empty array on error
     }
+}
 
     // Display communications in the list
     function displayCommunications(communications) {

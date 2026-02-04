@@ -461,3 +461,153 @@ a:hover {
         width: 100%;
     }
 }
+/* ==========================================
+   COLLAPSIBLE FILTERS SYSTEM
+   ========================================== */
+
+/* Main filters container */
+.filters-container {
+    margin-bottom: 20px;
+}
+
+/* Main Filters Toggle Button */
+.filters-toggle {
+    width: 100%;
+    padding: 12px 16px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+}
+
+.filters-toggle:hover {
+    background: #5568d3;
+}
+
+.toggle-arrow {
+    display: inline-block;
+    transition: transform 0.2s;
+    font-size: 12px;
+}
+
+.filters-toggle.expanded .toggle-arrow {
+    transform: rotate(90deg);
+}
+
+/* Filters Content Container */
+.filters-content {
+    margin-top: 12px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+}
+
+/* Filter Subsections */
+.filter-subsection {
+    margin-bottom: 12px;
+}
+
+.filter-subsection:last-child {
+    margin-bottom: 0;
+}
+
+/* Subsection Toggle Buttons */
+.filter-subsection-toggle {
+    width: 100%;
+    padding: 10px 14px;
+    background: white;
+    color: #555;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.filter-subsection-toggle:hover {
+    background: #f8f9fa;
+    border-color: #667eea;
+}
+
+.subsection-arrow {
+    display: inline-block;
+    transition: transform 0.2s;
+    font-size: 11px;
+}
+
+.filter-subsection-toggle.expanded .subsection-arrow {
+    transform: rotate(90deg);
+}
+
+/* Subsection Content */
+.filter-subsection-content {
+    margin-top: 10px;
+    padding: 12px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+}
+
+/* Keep existing filter button styles */
+/* (All your .filter-btn, .topic-filter-btn, .date-filter-btn styles stay the same) */
+
+/* Mobile responsive */
+@media (max-width: 600px) {
+    .filters-toggle {
+        font-size: 14px;
+        padding: 10px 14px;
+    }
+    
+    .filter-subsection-toggle {
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+}
+/* Filters Header (contains toggle + clear button) */
+.filters-header {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.filters-toggle {
+    flex: 1;
+}
+
+.clear-all-filters-btn {
+    padding: 10px 16px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background 0.2s;
+}
+
+.clear-all-filters-btn:hover {
+    background: #c82333;
+}
+
+@media (max-width: 600px) {
+    .clear-all-filters-btn {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+}
