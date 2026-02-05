@@ -121,19 +121,14 @@
 
 <!-- Main Filters Collapsible Container -->
 <div class="filters-container">
-<!-- Main Filters Toggle Button -->
+    <!-- Main Filters Toggle Button -->
 <div class="filters-header">
     <button class="filters-toggle" id="filters-toggle">
         <span class="toggle-arrow">▶</span> Filters
     </button>
-    <div class="filter-actions">
-        <button class="clear-all-filters-btn" id="clear-all-filters" style="display: none;">
-            Clear All Filters
-        </button>
-        <button class="export-pdf-btn" id="export-pdf-btn" style="display: none;">
-            📄 Export to PDF
-        </button>
-    </div>
+    <button class="clear-all-filters-btn" id="clear-all-filters" style="display: none;">
+        Clear All Filters
+    </button>
 </div>
     
     <!-- All Filter Sections (hidden by default) -->
@@ -229,7 +224,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

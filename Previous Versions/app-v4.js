@@ -597,46 +597,6 @@ function attachSearchListeners() {
             updateClearFiltersButton();
         });
     }
-    // ==========================================
-    // EXPORT PDF BUTTON
-    // ==========================================
-    
-    const exportPdfBtn = document.getElementById('export-pdf-btn');
-    
-    if (exportPdfBtn) {
-        exportPdfBtn.addEventListener('click', async () => {
-            console.log('Export PDF clicked');
-            
-            // Get current user info
-            const { data: { user } } = await supabase.auth.getUser();
-            
-            if (!user) {
-                alert('You must be logged in to export.');
-                return;
-            }
-            
-            // Check if there are communications to export
-            if (filteredCommunications.length === 0) {
-                alert('No communications to export. Try clearing your filters.');
-                return;
-            }
-            
-            // Get user info for PDF header
-            const userInfo = {
-                firstName: user.user_metadata?.first_name || user.email.split('@')[0],
-                lastName: user.user_metadata?.last_name || ''
-            };
-            
-            // Generate PDF
-            try {
-                exportToPDF(filteredCommunications, userInfo);
-                alert('✅ PDF exported successfully! Check your downloads folder.');
-            } catch (error) {
-                console.error('Error generating PDF:', error);
-                alert('Error generating PDF: ' + error.message);
-            }
-        });
-    }
 }
 
     // Load and display communications
@@ -674,18 +634,12 @@ async function loadCommunications() {
 }
 
     // Display communications in the list
-function displayCommunications(communications) {
-    // Show/hide export button based on whether there are communications
-    const exportBtn = document.getElementById('export-pdf-btn');
-    if (exportBtn) {
-        exportBtn.style.display = communications.length > 0 ? 'block' : 'none';
-    }
-    
-    // Show "no results" if filtered list is empty
-    if (communications.length === 0) {
-        communicationsList.innerHTML = '<p>No communications found matching your search.</p>';
-        return;
-    }
+    function displayCommunications(communications) {
+        // Show "no results" if filtered list is empty
+        if (communications.length === 0) {
+            communicationsList.innerHTML = '<p>No communications found matching your search.</p>';
+            return;
+        }
         
         communicationsList.innerHTML = communications.map(comm => {
             const date = new Date(comm.communication_date);
@@ -726,125 +680,3 @@ function displayCommunications(communications) {
 
     console.log('App initialization complete!');
 });
-// ==========================================
-// PDF EXPORT FUNCTIONALITY
-// ==========================================
-
-function exportToPDF(communications, userInfo) {
-    // Access jsPDF from the global window object
-    const { jsPDF } = window.jspdf;
-    
-    // Create new PDF (letter size, portrait)
-    const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'letter'
-    });
-    
-    // Get current date for filename and header
-    const now = new Date();
-    const dateStr = now.toLocaleDateString();
-    const filename = `Parent_Communications_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}.pdf`;
-    
-    // PDF Settings
-    const margin = 15;
-    const pageWidth = 216; // Letter width in mm
-    const pageHeight = 279; // Letter height in mm
-    const contentWidth = pageWidth - (margin * 2);
-    let yPosition = margin;
-    
-    // Header
-    doc.setFontSize(16);
-    doc.setFont(undefined, 'bold');
-    doc.text('Parent Communication Log', margin, yPosition);
-    yPosition += 8;
-    
-    // User info
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Teacher: ${userInfo.firstName} ${userInfo.lastName}`, margin, yPosition);
-    yPosition += 5;
-    doc.text(`Generated: ${dateStr}`, margin, yPosition);
-    yPosition += 5;
-    doc.text(`Total Communications: ${communications.length}`, margin, yPosition);
-    yPosition += 10;
-    
-    // Line separator
-    doc.setDrawColor(200, 200, 200);
-    doc.line(margin, yPosition, pageWidth - margin, yPosition);
-    yPosition += 8;
-    
-    // Communications
-    communications.forEach((comm, index) => {
-        // Check if we need a new page
-        if (yPosition > pageHeight - 40) {
-            doc.addPage();
-            yPosition = margin;
-        }
-        
-        // Communication header
-        doc.setFontSize(11);
-        doc.setFont(undefined, 'bold');
-        
-        const commDate = new Date(comm.communication_date);
-        const formattedDate = commDate.toLocaleDateString() + ' ' + commDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
-        doc.text(`${index + 1}. ${comm.student_name} - ${formattedDate}`, margin, yPosition);
-        yPosition += 6;
-        
-        // Communication details
-        doc.setFontSize(9);
-        doc.setFont(undefined, 'normal');
-        
-        const methodIcon = {
-            'phone': 'Phone Call',
-            'email': 'Email',
-            'in-person': 'In-Person',
-            'text': 'Text Message',
-            'other': 'Other'
-        }[comm.method] || comm.method;
-        
-        doc.text(`Parent/Guardian: ${comm.parent_name}`, margin + 5, yPosition);
-        yPosition += 5;
-        doc.text(`Method: ${methodIcon} | Topic: ${comm.topic}`, margin + 5, yPosition);
-        yPosition += 5;
-        
-        // Summary (wrap text if long)
-        doc.text(`Summary: ${comm.summary}`, margin + 5, yPosition, {
-            maxWidth: contentWidth - 10
-        });
-        
-        // Calculate how many lines the summary took
-        const summaryLines = doc.splitTextToSize(comm.summary, contentWidth - 10);
-        yPosition += (summaryLines.length * 4);
-        
-        // Follow-up flag
-        if (comm.follow_up_needed) {
-            yPosition += 4;
-            doc.setTextColor(220, 53, 69); // Red color
-            doc.text('⚠ Follow-up needed', margin + 5, yPosition);
-            doc.setTextColor(0, 0, 0); // Back to black
-        }
-        
-        yPosition += 8;
-        
-        // Separator line between communications
-        doc.setDrawColor(230, 230, 230);
-        doc.line(margin, yPosition, pageWidth - margin, yPosition);
-        yPosition += 6;
-    });
-    
-    // Footer on last page
-    const pageCount = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(128, 128, 128);
-        doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
-    }
-    
-    // Save the PDF
-    doc.save(filename);
-    
-    console.log(`PDF exported: ${filename}`);
-}

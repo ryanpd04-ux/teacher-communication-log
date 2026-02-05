@@ -600,44 +600,7 @@ a:hover {
     white-space: nowrap;
     transition: background 0.2s;
 }
-/* Filter actions container */
-.filter-actions {
-    display: flex;
-    gap: 10px;
-}
 
-/* Export PDF button */
-.export-pdf-btn {
-    padding: 10px 16px;
-    background: #28a745;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    white-space: nowrap;
-    transition: background 0.2s;
-}
-
-.export-pdf-btn:hover {
-    background: #218838;
-}
-
-/* Mobile responsive */
-@media (max-width: 600px) {
-    .filter-actions {
-        flex-direction: column;
-        width: 100%;
-    }
-    
-    .clear-all-filters-btn,
-    .export-pdf-btn {
-        width: 100%;
-        font-size: 12px;
-        padding: 8px 12px;
-    }
-}
 .clear-all-filters-btn:hover {
     background: #c82333;
 }
