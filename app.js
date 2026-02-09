@@ -174,13 +174,38 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Show/hide sections
     function showAuth() {
-        authSection.style.display = 'block';
-        appSection.style.display = 'none';
-        // Clear communications list when signing out
-        if (communicationsList) {
-            communicationsList.innerHTML = '';
-        }
+    authSection.style.display = 'block';
+    appSection.style.display = 'none';
+    
+    // Clear communications list when signing out
+    if (communicationsList) {
+        communicationsList.innerHTML = '';
     }
+    
+    // Reset all filters
+    currentMethodFilter = 'all';
+    currentTopicFilter = 'all';
+    currentDateFilter = 'all';
+    customStartDate = null;
+    customEndDate = null;
+    
+    // Clear search input
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    
+    // Hide clear filters and export buttons
+    const clearAllFiltersBtn = document.getElementById('clear-all-filters');
+    const exportPdfBtn = document.getElementById('export-pdf-btn');
+    if (clearAllFiltersBtn) clearAllFiltersBtn.style.display = 'none';
+    if (exportPdfBtn) exportPdfBtn.style.display = 'none';
+    
+    // Collapse filters
+    const filtersContent = document.getElementById('filters-content');
+    const filtersToggle = document.getElementById('filters-toggle');
+    if (filtersContent) filtersContent.style.display = 'none';
+    if (filtersToggle) filtersToggle.classList.remove('expanded');
+}
 
     async function showApp() {
         authSection.style.display = 'none';
@@ -203,7 +228,34 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        loadCommunications().then(() => {
+        // Reset all filters when signing in
+    currentMethodFilter = 'all';
+    currentTopicFilter = 'all';
+    currentDateFilter = 'all';
+    customStartDate = null;
+    customEndDate = null;
+    if (searchInput) searchInput.value = '';
+    
+    // Collapse filters
+    const filtersContent = document.getElementById('filters-content');
+    const filtersToggle = document.getElementById('filters-toggle');
+    if (filtersContent) filtersContent.style.display = 'none';
+    if (filtersToggle) filtersToggle.classList.remove('expanded');
+    
+    loadCommunications().then(() => {
+        // Reset all filter buttons to "All"
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-filter') === 'all');
+        });
+        
+        document.querySelectorAll('.topic-filter-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-topic') === 'all');
+        });
+        
+        document.querySelectorAll('.date-filter-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-days') === 'all');
+        });
+        
         // Display all communications on initial load
         searchCommunications('');
     });
@@ -681,9 +733,16 @@ function displayCommunications(communications) {
         exportBtn.style.display = communications.length > 0 ? 'block' : 'none';
     }
     
-    // Show "no results" if filtered list is empty
+    // Show appropriate message if no communications to display
     if (communications.length === 0) {
-        communicationsList.innerHTML = '<p>No communications found matching your search.</p>';
+        // Check if we have ANY communications at all
+        if (allCommunications.length === 0) {
+            // No communications logged yet
+            communicationsList.innerHTML = '<p class="empty-state">No communications logged yet.</p>';
+        } else {
+            // Have communications but filters are hiding them
+            communicationsList.innerHTML = '<p class="empty-state">No communications found matching your filters. <button class="clear-filters-link" onclick="document.getElementById(\'clear-all-filters\').click()">Clear filters</button></p>';
+        }
         return;
     }
         
@@ -700,22 +759,31 @@ function displayCommunications(communications) {
             }[comm.method] || '📝';
             
             return `
-                <div class="communication-card">
-                    <div class="comm-header">
-                        <div>
-                            <strong>${comm.student_name}</strong> ${methodIcon}
-                            <span class="topic-badge">${comm.topic}</span>
-                        </div>
-                        <span class="comm-date">${formattedDate}</span>
-                    </div>
-                    <div class="comm-body">
-                        <p><strong>Parent/Guardian:</strong> ${comm.parent_name}</p>
-                        <p><strong>Summary:</strong> ${comm.summary}</p>
-                        ${comm.follow_up_needed ? '<p class="follow-up">⚠️ Follow-up needed</p>' : ''}
-                    </div>
-                </div>
-            `;
+    <div class="communication-card" data-comm-id="${comm.id}">
+        <div class="comm-header">
+            <div class="comm-header-left">
+                <strong>${comm.student_name}</strong> ${methodIcon}
+                <span class="topic-badge">${comm.topic}</span>
+            </div>
+            <div class="comm-header-right">
+                <span class="comm-date">${formattedDate}</span>
+                <button class="menu-btn" data-id="${comm.id}">⋮</button>
+            </div>
+        </div>
+        <div class="comm-body">
+            <p><strong>Parent/Guardian:</strong> ${comm.parent_name}</p>
+            <p><strong>Summary:</strong> ${comm.summary}</p>
+            ${comm.follow_up_needed ? '<p class="follow-up">⚠️ Follow-up needed</p>' : ''}
+        </div>
+        <div class="comm-actions">
+            <button class="edit-btn" data-id="${comm.id}">✏️ Edit</button>
+            <button class="delete-btn" data-id="${comm.id}">🗑️ Delete</button>
+        </div>
+    </div>
+`;
         }).join('');
+        // Attach menu toggle listeners
+        attachMenuListeners();
     }
 
     // Always start at sign in page
@@ -725,7 +793,126 @@ function displayCommunications(communications) {
     });
 
     console.log('App initialization complete!');
+    // ... other code above ...
+    
+    console.log('App initialization complete!');
+    
+    // ==========================================
+    // MENU TOGGLE FUNCTIONALITY
+    // ==========================================
+    
+    function attachMenuListeners() {
+        const menuBtns = document.querySelectorAll('.menu-btn');
+        
+        menuBtns.forEach(btn => {
+            // Remove any existing listeners by cloning
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            
+            newBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                const commId = newBtn.getAttribute('data-id');
+                const card = document.querySelector(`[data-comm-id="${commId}"]`);
+                const actionsDiv = card.querySelector('.comm-actions');
+                
+                // Close all other open menus
+                document.querySelectorAll('.comm-actions.show').forEach(div => {
+                    if (div !== actionsDiv) {
+                        div.classList.remove('show');
+                    }
+                });
+                
+                document.querySelectorAll('.menu-btn.active').forEach(b => {
+                    if (b !== newBtn) {
+                        b.classList.remove('active');
+                    }
+                });
+                
+                // Toggle this menu
+                actionsDiv.classList.toggle('show');
+                newBtn.classList.toggle('active');
+            });
+        });
+        
+        // Close menus when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.communication-card')) {
+                document.querySelectorAll('.comm-actions.show').forEach(div => {
+                    div.classList.remove('show');
+                });
+                document.querySelectorAll('.menu-btn.active').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+            }
+        });
+        // Attach delete button listeners
+    const deleteBtns = document.querySelectorAll('.delete-btn');
+    
+    deleteBtns.forEach(btn => {
+        // Remove any existing listeners by cloning
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        
+        newBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            
+            const commId = newBtn.getAttribute('data-id');
+            console.log('Delete button clicked for ID:', commId);
+            
+            // Confirmation dialog
+            const confirmed = confirm('Are you sure you want to delete this communication? This cannot be undone.');
+            
+            if (!confirmed) {
+                console.log('Delete cancelled by user');
+                return;
+            }
+            
+            try {
+                console.log('Starting delete process...');
+                console.log('allCommunications BEFORE delete:', allCommunications.length);
+                
+                // Delete from database
+                const { data, error } = await supabase
+                    .from('communications')
+                    .delete()
+                    .eq('id', commId);
+                
+                if (error) throw error;
+                
+                console.log('Database delete successful');
+                console.log('Delete response:', data);
+                
+                // Remove from allCommunications array
+const beforeLength = allCommunications.length;
+console.log('Trying to remove ID:', commId, 'Type:', typeof commId);
+console.log('Sample ID from array:', allCommunications[0]?.id, 'Type:', typeof allCommunications[0]?.id);
+
+allCommunications = allCommunications.filter(c => {
+    // Convert both to strings for comparison
+    return String(c.id) !== String(commId);
 });
+
+console.log('allCommunications AFTER delete:', allCommunications.length);
+console.log('Actually removed:', beforeLength - allCommunications.length, 'items');
+                // Re-run search to update display
+                const currentSearchTerm = searchInput ? searchInput.value : '';
+                console.log('Re-running search with term:', currentSearchTerm);
+                searchCommunications(currentSearchTerm);
+                
+                // Show success message
+                alert('✅ Communication deleted successfully!');
+                
+            } catch (error) {
+                console.error('Error deleting communication:', error);
+                alert('Error deleting communication: ' + error.message);
+            }
+        });
+    });
+
+    }
+
+}); 
 // ==========================================
 // PDF EXPORT FUNCTIONALITY
 // ==========================================
