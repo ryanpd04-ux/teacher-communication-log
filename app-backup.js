@@ -906,6 +906,7 @@ console.log('Actually removed:', beforeLength - allCommunications.length, 'items
         });
     });
 
+    
 // Attach edit button listeners
     const editBtns = document.querySelectorAll('.edit-btn');
     
@@ -932,11 +933,9 @@ console.log('Actually removed:', beforeLength - allCommunications.length, 'items
             openEditModal(comm);
         });
     });
-} // Close attachMenuListeners
-
-// ==========================================
-// EDIT MODAL FUNCTIONALITY
-// ==========================================
+    // ==========================================
+    // EDIT MODAL FUNCTIONALITY
+    // ==========================================
     
     const editModal = document.getElementById('edit-modal');
     const editForm = document.getElementById('edit-form');

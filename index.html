@@ -227,7 +227,71 @@
 </div>
 </div>
     </div>
-
+<!-- Edit Communication Modal -->
+    <div id="edit-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Communication</h2>
+                <button class="modal-close" id="close-edit-modal">&times;</button>
+            </div>
+            <form id="edit-form">
+                <input type="hidden" id="edit-comm-id">
+                
+                <div class="form-group">
+                    <label for="edit-student-name">Student Name</label>
+                    <input type="text" id="edit-student-name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-parent-name">Parent/Guardian Name</label>
+                    <input type="text" id="edit-parent-name" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-method">Communication Method</label>
+                        <select id="edit-method" required>
+                            <option value="phone">📞 Phone Call</option>
+                            <option value="email">✉️ Email</option>
+                            <option value="in-person">👤 In-Person</option>
+                            <option value="text">💬 Text Message</option>
+                            <option value="other">📝 Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-topic">Topic</label>
+                        <select id="edit-topic" required>
+                            <option value="behavior">Behavior</option>
+                            <option value="academic">Academic</option>
+                            <option value="attendance">Attendance</option>
+                            <option value="iep_504">IEP/504</option>
+                            <option value="general">General</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-summary">Summary (500 characters max)</label>
+                    <textarea id="edit-summary" required maxlength="500" rows="4"></textarea>
+                    <div class="char-count"><span id="edit-char-counter">0</span>/500</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="edit-follow-up">
+                        Follow-up needed
+                    </label>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" id="cancel-edit">Cancel</button>
+                    <button type="submit" class="save-btn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="app.js"></script>
