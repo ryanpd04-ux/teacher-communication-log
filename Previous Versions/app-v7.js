@@ -20,28 +20,6 @@ document.addEventListener('DOMContentLoaded', function() {
             banner.style.display = 'none';
         }, 3000);
     }
-    // ==========================================
-    // LOADING OVERLAY FUNCTIONS
-    // ==========================================
-    
-    function showLoading(message) {
-        if (!message) message = 'Loading...';
-        
-        var overlay = document.getElementById('loading-overlay');
-        var messageEl = document.getElementById('loading-message');
-        
-        if (overlay && messageEl) {
-            messageEl.textContent = message;
-            overlay.style.display = 'flex';
-        }
-    }
-    
-    function hideLoading() {
-        var overlay = document.getElementById('loading-overlay');
-        if (overlay) {
-            overlay.style.display = 'none';
-        }
-    }
     // Initialize Supabase - REPLACE THESE WITH YOUR ACTUAL VALUES
     const SUPABASE_URL = 'https://ogfwvffqoofacdoaavrf.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9nZnd2ZmZxb29mYWNkb2FhdnJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2MzQ0NTYsImV4cCI6MjA4NTIxMDQ1Nn0.XHCkZgNLYq9aBXMV_VFOh8XrC4jO9JUxcAdrqO7UIu4';
@@ -248,7 +226,6 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
     async function showApp() {
-        showLoading('Loading your communications...');
         authSection.style.display = 'none';
         appSection.style.display = 'block';
         
@@ -299,7 +276,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Display all communications on initial load
         searchCommunications('');
-        hideLoading();
     });
 }
     
@@ -327,8 +303,6 @@ document.addEventListener('DOMContentLoaded', function() {
         logForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             console.log('Form submitted!');
-            
-            showLoading('Saving communication...');
             
             // Get form values
             const communication = {
@@ -364,7 +338,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (error) throw error;
                 
                 console.log('Communication saved!', data);
-                hideLoading();
                 showNotification('Communication logged successfully!', 'success');
                 
               // Reset form
@@ -380,7 +353,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 
             } catch (error) {
                 console.error('Error saving communication:', error);
-                hideLoading();
                 showNotification('Error: ' + error.message, 'error');
             }
         });
@@ -723,13 +695,10 @@ function attachSearchListeners() {
             
             // Generate PDF
             try {
-                showLoading('Generating PDF...');
                 exportToPDF(filteredCommunications, userInfo);
-                hideLoading();
                 showNotification('PDF exported successfully! Check your downloads folder.', 'success');
             } catch (error) {
                 console.error('Error generating PDF:', error);
-                hideLoading();
                 showNotification('Error generating PDF: ' + error.message, 'error');
             }
         });
@@ -759,17 +728,14 @@ async function loadCommunications() {
         // Attach search listeners (only once)
         attachSearchListeners();
         
-        hideLoading(); // ← ADD THIS LINE
-        
-        return allCommunications;
+        return allCommunications; // Add this return statement
         
     } catch (error) {
         console.error('Error loading communications:', error);
-        hideLoading(); // ← ADD THIS LINE
         if (communicationsList) {
             communicationsList.innerHTML = '<p>Error loading communications: ' + error.message + '</p>';
         }
-        return [];
+        return []; // Return empty array on error
     }
 }
 
@@ -914,7 +880,6 @@ function displayCommunications(communications) {
             
             try {
                 console.log('Starting delete process...');
-                showLoading('Deleting communication...');
                 console.log('allCommunications BEFORE delete:', allCommunications.length);
                 
                 // Delete from database
@@ -946,12 +911,10 @@ console.log('Actually removed:', beforeLength - allCommunications.length, 'items
                 searchCommunications(currentSearchTerm);
                 
                 // Show success message
-                hideLoading();
                 showNotification('Communication deleted successfully!', 'success');
                 
             } catch (error) {
                 console.error('Error deleting communication:', error);
-                hideLoading();
                 showNotification('Error deleting communication: ' + error.message, 'error');
             }
         });
@@ -1061,8 +1024,6 @@ console.log('Actually removed:', beforeLength - allCommunications.length, 'items
             e.preventDefault();
             console.log('Edit form submitted');
             
-            showLoading('Updating communication...');
-            
             const commId = document.getElementById('edit-comm-id').value;
             
             const updatedData = {
@@ -1104,12 +1065,10 @@ console.log('Actually removed:', beforeLength - allCommunications.length, 'items
                 closeEditModal();
                 
                 // Show success message
-                hideLoading();
                 showNotification('Communication updated successfully!', 'success');
                 
             } catch (error) {
                 console.error('Error updating communication:', error);
-                hideLoading();
                 showNotification('Error updating communication: ' + error.message, 'error');
             }
         });
