@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Communication Log</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Teacher Communication Log</h1>
+        
+        <div id="auth-section">
+    <h2>Sign In</h2>
+    <form id="auth-form">
+        <!-- First Name (only shown on sign up) -->
+        <div id="first-name-field" style="display: none;">
+            <input type="text" id="first-name" placeholder="First Name *" maxlength="50">
+        </div>
+        
+        <!-- Last Name (only shown on sign up) -->
+        <div id="last-name-field" style="display: none;">
+            <input type="text" id="last-name" placeholder="Last Name or Initial (optional)" maxlength="50">
+        </div>
+        
+        <!-- Email (always shown) -->
+        <input type="email" id="email" placeholder="Email" required>
+        
+        <!-- Password (always shown) -->
+        <input type="password" id="password" placeholder="Password (min 6 characters)" required minlength="6">
+        
+        <!-- Confirm Password (only shown on sign up) -->
+        <div id="confirm-password-field" style="display: none;">
+            <input type="password" id="confirm-password" placeholder="Confirm Password *">
+        </div>
+        
+        <button type="submit">Sign In</button>
+    </form>
+    <p>Don't have an account? <a href="#" id="toggle-signup">Sign Up</a></p>
+</div>
+<!-- Notification Banner -->
+        <div id="notification-banner" style="display: none;"></div>
+        <!-- Loading Overlay -->
+    <div id="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p id="loading-message">Loading...</p>
+    </div>
+    <!-- App Section -->
+        <div id="app-section" style="display: none;">
+    <div class="header">
+        <p>Welcome! <button id="signout-btn">Sign Out</button></p>
+    </div>
+
+    <!-- Log Entry Form -->
+    <div class="log-form-section">
+        <h2>➕ Log New Communication</h2>
+        <form id="log-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="student-name">Student Name</label>
+                    <input type="text" id="student-name" required placeholder="e.g., Johnny Smith">
+                </div>
+                
+                <div class="form-group">
+                    <label for="parent-name">Parent/Guardian Name</label>
+                    <input type="text" id="parent-name" required placeholder="e.g., Jane Smith">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="method">Communication Method</label>
+                    <select id="method" required>
+                        <option value="">Select method...</option>
+                        <option value="phone">📞 Phone Call</option>
+                        <option value="email">✉️ Email</option>
+                        <option value="in-person">👤 In-Person</option>
+                        <option value="text">💬 Text Message</option>
+                        <option value="other">📝 Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="topic">Topic</label>
+                    <select id="topic" required>
+                        <option value="">Select topic...</option>
+                        <option value="behavior">Behavior</option>
+                        <option value="academic">Academic</option>
+                        <option value="attendance">Attendance</option>
+                        <option value="iep_504">IEP/504</option>
+                        <option value="general">General</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="summary">Summary (500 characters max)</label>
+                <textarea id="summary" required maxlength="500" rows="4" placeholder="Brief summary of what was discussed..."></textarea>
+                <div class="char-count"><span id="char-counter">0</span>/500</div>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="follow-up">
+                    Follow-up needed
+                </label>
+            </div>
+
+            <button type="submit" class="submit-btn">Log Communication</button>
+        </form>
+    </div>
+
+    <!-- Communications List -->
+<div class="communications-section">
+    <h2>📋 Your Communications</h2>
+    
+   <!-- Search Bar -->
+<div class="search-section">
+    <input 
+        type="text" 
+        id="search-input" 
+        placeholder="🔍 Search by student, parent, or keywords..."
+        class="search-input"
+    >
+    <button id="clear-search" class="clear-btn" style="display: none;">Clear</button>
+</div>
+
+<!-- Main Filters Collapsible Container -->
+<div class="filters-container">
+<!-- Main Filters Toggle Button -->
+<div class="filters-header">
+    <button class="filters-toggle" id="filters-toggle">
+        <span class="toggle-arrow">▶</span> Filters
+    </button>
+    <div class="filter-actions">
+        <button class="clear-all-filters-btn" id="clear-all-filters" style="display: none;">
+            Clear All Filters
+        </button>
+        <button class="export-pdf-btn" id="export-pdf-btn" style="display: none;">
+            📄 Export to PDF
+        </button>
+    </div>
+</div>
+    
+    <!-- All Filter Sections (hidden by default) -->
+    <div class="filters-content" id="filters-content" style="display: none;">
+        
+        <!-- Method Filter -->
+        <div class="filter-subsection">
+            <button class="filter-subsection-toggle" data-target="method-filters">
+                <span class="subsection-arrow">▶</span> Filter by method
+            </button>
+            <div class="filter-subsection-content" id="method-filters" style="display: none;">
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="phone">📞 Phone</button>
+                    <button class="filter-btn" data-filter="email">✉️ Email</button>
+                    <button class="filter-btn" data-filter="in-person">👤 In-Person</button>
+                    <button class="filter-btn" data-filter="text">💬 Text</button>
+                    <button class="filter-btn" data-filter="other">📝 Other</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Topic Filter -->
+        <div class="filter-subsection">
+            <button class="filter-subsection-toggle" data-target="topic-filters">
+                <span class="subsection-arrow">▶</span> Filter by topic
+            </button>
+            <div class="filter-subsection-content" id="topic-filters" style="display: none;">
+                <div class="filter-buttons">
+                    <button class="topic-filter-btn active" data-topic="all">All</button>
+                    <button class="topic-filter-btn" data-topic="behavior">Behavior</button>
+                    <button class="topic-filter-btn" data-topic="academic">Academic</button>
+                    <button class="topic-filter-btn" data-topic="attendance">Attendance</button>
+                    <button class="topic-filter-btn" data-topic="iep_504">IEP/504</button>
+                    <button class="topic-filter-btn" data-topic="general">General</button>
+                    <button class="topic-filter-btn" data-topic="other">Other</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Date Filter -->
+        <div class="filter-subsection">
+            <button class="filter-subsection-toggle" data-target="date-filters">
+                <span class="subsection-arrow">▶</span> Filter by date
+            </button>
+            <div class="filter-subsection-content" id="date-filters" style="display: none;">
+                <div class="filter-buttons">
+                    <button class="date-filter-btn active" data-days="all">All Time</button>
+                    <button class="date-filter-btn" data-days="7">Last 7 Days</button>
+                    <button class="date-filter-btn" data-days="30">Last 30 Days</button>
+                    <button class="date-filter-btn" data-days="90">Last 90 Days</button>
+                    <button class="date-filter-btn" data-days="custom">Custom Range</button>
+                </div>
+                
+                <!-- Custom date range inputs -->
+                <div id="custom-date-range" style="display: none;">
+                    <div class="date-inputs">
+                        <div class="date-input-group">
+                            <label for="start-date">From:</label>
+                            <input type="date" id="start-date" class="date-input">
+                        </div>
+                        <div class="date-input-group">
+                            <label for="end-date">To:</label>
+                            <input type="date" id="end-date" class="date-input">
+                        </div>
+                        <button id="apply-custom-date" class="apply-date-btn">Apply</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+        <!-- Custom date range inputs (hidden by default) -->
+        <div id="custom-date-range" style="display: none;">
+            <div class="date-inputs">
+                <div class="date-input-group">
+                    <label for="start-date">From:</label>
+                    <input type="date" id="start-date" class="date-input">
+                </div>
+                <div class="date-input-group">
+                    <label for="end-date">To:</label>
+                    <input type="date" id="end-date" class="date-input">
+                </div>
+                <button id="apply-custom-date" class="apply-date-btn">Apply</button>
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="communications-list"></div>
+</div>
+</div>
+    </div>
+<!-- Edit Communication Modal -->
+    <div id="edit-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Communication</h2>
+                <button class="modal-close" id="close-edit-modal">&times;</button>
+            </div>
+            <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+            <form id="edit-form">
+                <input type="hidden" id="edit-comm-id">
+                
+                <div class="form-group">
+                    <label for="edit-student-name">Student Name</label>
+                    <input type="text" id="edit-student-name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-parent-name">Parent/Guardian Name</label>
+                    <input type="text" id="edit-parent-name" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-method">Communication Method</label>
+                        <select id="edit-method" required>
+                            <option value="phone">📞 Phone Call</option>
+                            <option value="email">✉️ Email</option>
+                            <option value="in-person">👤 In-Person</option>
+                            <option value="text">💬 Text Message</option>
+                            <option value="other">📝 Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-topic">Topic</label>
+                        <select id="edit-topic" required>
+                            <option value="behavior">Behavior</option>
+                            <option value="academic">Academic</option>
+                            <option value="attendance">Attendance</option>
+                            <option value="iep_504">IEP/504</option>
+                            <option value="general">General</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-summary">Summary (500 characters max)</label>
+                    <textarea id="edit-summary" required maxlength="500" rows="4"></textarea>
+                    <div class="char-count"><span id="edit-char-counter">0</span>/500</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="edit-follow-up">
+                        Follow-up needed
+                    </label>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" id="cancel-edit">Cancel</button>
+                    <button type="submit" class="save-btn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
